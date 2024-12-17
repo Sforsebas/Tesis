@@ -6,10 +6,6 @@ export const styles = StyleSheet.create({
     marginHorizontal: 15,
     justifyContent: "space-between",
   },
-  ratingContent: {
-    height: 160,
-    justifyContent: "center",
-  },
   descripcion: {
     height: 150,
   },
