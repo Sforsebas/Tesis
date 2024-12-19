@@ -34,6 +34,9 @@ export function AgregarReservaEspacioDeportivo(props) {
           onDateChange={(selectedDate) =>
             formik.setFieldValue("date", selectedDate)
           }
+          onTimeChange={(selectedTime) =>
+            formik.setFieldValue("time", selectedTime)
+          }
         />
       </View>
 

@@ -8,9 +8,8 @@ export function Header(props) {
 
   return (
     <View style={styles.content}>
-      <View style={styles.titleView}>
+      <View style={styles.container}>
         <Text style={styles.name}>{espaciodeportivo.name}</Text>
-        <Rating imageSize={20} readOnly startingValue={3.5} />
       </View>
       <Text style={styles.description}>{espaciodeportivo.description}</Text>
     </View>

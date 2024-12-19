@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Button } from "react-native";
+import { View, Text, TouchableOpacity } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { styles } from "./DatePicker.styles";
 
@@ -12,38 +12,54 @@ export function DatePickerComponent({ onDateChange, onTimeChange }) {
   const onDateChangeHandler = (event, selectedDate) => {
     setShowDate(false);
     if (selectedDate) {
-      setDate(selectedDate); // Actualiza la fecha seleccionada
-      if (onDateChange) onDateChange(selectedDate); // Notifica al componente padre
+      setDate(selectedDate);
+      if (onDateChange) onDateChange(selectedDate);
     }
   };
 
   const onTimeChangeHandler = (event, selectedTime) => {
     setShowTime(false);
     if (selectedTime) {
-      setTime(selectedTime); // Actualiza la hora seleccionada
-      if (onTimeChange) onTimeChange(selectedTime); // Notifica al componente padre
+      setTime(selectedTime);
+      if (onTimeChange) onTimeChange(selectedTime);
     }
+  };
+
+  const formatDate = (date) => {
+    const day = date.getDate().toString().padStart(2, "0");
+    const month = (date.getMonth() + 1).toString().padStart(2, "0");
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+  };
+
+  const formatTime = (time) => {
+    const hours = time.getHours().toString().padStart(2, "0");
+    const minutes = time.getMinutes().toString().padStart(2, "0");
+    return `${hours}:${minutes}`;
   };
 
   return (
     <View>
       {/* Botón para seleccionar la fecha */}
-      <View style={styles.btnContainer}>
-        <Button
-          title={`Seleccionar Fecha: ${date.toLocaleDateString()}`}
-          onPress={() => setShowDate(true)}
-          color={styles.btn.backgroundColor} // Usa el color definido en styles
-        />
-      </View>
+      <TouchableOpacity style={styles.btn} onPress={() => setShowDate(true)}>
+        <View style={styles.textContainer}>
+          <Text style={styles.btnText}>
+            Seleccionar Fecha: {formatDate(date)}
+          </Text>
+        </View>
+      </TouchableOpacity>
 
       {/* Botón para seleccionar la hora */}
-      <View style={styles.btnContainer}>
-        <Button
-          title={`Seleccionar Hora: ${time.toLocaleTimeString()}`}
-          onPress={() => setShowTime(true)}
-          color={styles.btn.backgroundColor} // Usa el color definido en styles
-        />
-      </View>
+      <TouchableOpacity
+        style={[styles.btn, styles.btnSpacing]}
+        onPress={() => setShowTime(true)}
+      >
+        <View style={styles.textContainer}>
+          <Text style={styles.btnText}>
+            Seleccionar Hora: {formatTime(time)}
+          </Text>
+        </View>
+      </TouchableOpacity>
 
       {/* Selector de fecha */}
       {showDate && (
