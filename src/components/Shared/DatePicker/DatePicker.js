@@ -12,8 +12,14 @@ export function DatePickerComponent({ onDateChange, onTimeChange }) {
   const onDateChangeHandler = (event, selectedDate) => {
     setShowDate(false);
     if (selectedDate) {
-      setDate(selectedDate);
-      if (onDateChange) onDateChange(selectedDate);
+      // Truncar la hora para que solo se guarde la fecha
+      const truncatedDate = new Date(
+        selectedDate.getFullYear(),
+        selectedDate.getMonth(),
+        selectedDate.getDate()
+      );
+      setDate(truncatedDate);
+      if (onDateChange) onDateChange(truncatedDate); // Pasa solo la fecha sin la hora
     }
   };
 
@@ -21,7 +27,7 @@ export function DatePickerComponent({ onDateChange, onTimeChange }) {
     setShowTime(false);
     if (selectedTime) {
       setTime(selectedTime);
-      if (onTimeChange) onTimeChange(selectedTime);
+      if (onTimeChange) onTimeChange(formatTime(selectedTime)); // Pasar el formato HH:mm
     }
   };
 
@@ -29,7 +35,7 @@ export function DatePickerComponent({ onDateChange, onTimeChange }) {
     const day = date.getDate().toString().padStart(2, "0");
     const month = (date.getMonth() + 1).toString().padStart(2, "0");
     const year = date.getFullYear();
-    return `${day}/${month}/${year}`;
+    return `${day}/${month}/${year}`; // Solo devuelve la fecha, no la hora
   };
 
   const formatTime = (time) => {
