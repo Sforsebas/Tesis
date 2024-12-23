@@ -3,8 +3,18 @@ import { View, Text } from "react-native";
 import { Input, Button } from "react-native-elements";
 import { useFormik } from "formik";
 import Toast from "react-native-toast-message";
-import { getAuth } from "firebase/auth";
 import { v4 as uuid } from "uuid";
+import { getAuth } from "firebase/auth";
+import {
+  doc,
+  setDoc,
+  query,
+  collection,
+  where,
+  onSnapshot,
+  updateDoc,
+} from "firebase/firestore";
+import { db } from "../../../utils";
 import {
   initialValues,
   validationSchema,
@@ -13,6 +23,8 @@ import { styles } from "./AgregarReservaEspacioDeportivo.styles";
 import { DatePickerComponent } from "../../../components/Shared";
 
 export function AgregarReservaEspacioDeportivo(props) {
+  const { route } = props;
+
   const formik = useFormik({
     initialValues: initialValues(),
     validationSchema: validationSchema(),
@@ -24,10 +36,16 @@ export function AgregarReservaEspacioDeportivo(props) {
         const idDoc = uuid();
         const newData = formValue;
         newData.id = idDoc;
-        newData.idEspacioDeportivo = params.idEspacioDeportivo;
+        //Datos que se pueden consultar para una futura Querry
+        newData.idEspacioDeportivo = route.params.idEspacioDeportivo;
         newData.idUser = auth.currentUser.uid;
+        newData.createAt = new Date();
         //REVISAR CURSO YA QUE ÉSTA PARTE SON LOS DATOS QUE TENDRÁ EL FORMULARIO
+
+        //Código para crear la tabla "reservas" en la base de datos
+        await setDoc(doc(db, "reservas", idDoc), newData);
       } catch (error) {
+        console.log(error);
         Toast.show({
           type: "error",
           position: "bottom",
