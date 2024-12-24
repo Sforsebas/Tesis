@@ -22,7 +22,7 @@ export function EspacioDeportivoScreen(props) {
 
   useEffect(() => {
     setEspacioDeportivo(null);
-    onSnapshot(doc(db, "espaciosdeportivos", route.params.id), (doc) => {
+    onSnapshot(doc(db, "Espacio_Deportivo", route.params.id), (doc) => {
       setEspacioDeportivo(doc.data());
     });
   }, [route.params.id]);

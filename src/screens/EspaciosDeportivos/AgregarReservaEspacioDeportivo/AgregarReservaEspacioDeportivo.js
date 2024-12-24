@@ -1,6 +1,7 @@
 import React from "react";
 import { View, Text } from "react-native";
 import { Input, Button } from "react-native-elements";
+import { useNavigation } from "@react-navigation/native";
 import { useFormik } from "formik";
 import Toast from "react-native-toast-message";
 import { v4 as uuid } from "uuid";
@@ -14,7 +15,7 @@ import {
   onSnapshot,
   updateDoc,
 } from "firebase/firestore";
-import { db } from "../../../utils";
+import { db, screen } from "../../../utils";
 import {
   initialValues,
   validationSchema,
@@ -24,6 +25,7 @@ import { DatePickerComponent } from "../../../components/Shared";
 
 export function AgregarReservaEspacioDeportivo(props) {
   const { route } = props;
+  const navigation = useNavigation();
 
   const formik = useFormik({
     initialValues: initialValues(),
@@ -43,7 +45,8 @@ export function AgregarReservaEspacioDeportivo(props) {
         //REVISAR CURSO YA QUE ÉSTA PARTE SON LOS DATOS QUE TENDRÁ EL FORMULARIO
 
         //Código para crear la tabla "reservas" en la base de datos
-        await setDoc(doc(db, "reservas", idDoc), newData);
+        await setDoc(doc(db, "Reserva", idDoc), newData);
+        navigation.navigate(screen.espaciosdeportivos.espaciosdeportivos);
       } catch (error) {
         console.log(error);
         Toast.show({

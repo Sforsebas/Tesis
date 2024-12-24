@@ -30,7 +30,7 @@ export function AgregarEspacioDeportivoScreen() {
         newData.id = uuid();
         newData.createAt = new Date();
 
-        const myDB = doc(db, "espaciosdeportivos", newData.id);
+        const myDB = doc(db, "Espacio_Deportivo", newData.id);
         await setDoc(myDB, newData);
 
         navigation.goBack();

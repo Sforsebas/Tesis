@@ -22,7 +22,7 @@ export function EspaciosDeportivosScreen(props) {
 
   useEffect(() => {
     const q = query(
-      collection(db, "espaciosdeportivos"),
+      collection(db, "Espacio_Deportivo"),
       orderBy("createAt", "desc")
     );
 
