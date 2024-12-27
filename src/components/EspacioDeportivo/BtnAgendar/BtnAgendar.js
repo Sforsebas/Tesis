@@ -2,14 +2,17 @@ import React, { useState, useEffect } from "react";
 import { View } from "react-native";
 import { Text, Button } from "react-native-elements";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { query, collection, where, onSnapshot } from "firebase/firestore";
+import { size } from "lodash";
 import { useNavigation } from "@react-navigation/native";
-import { screen } from "../../../utils";
+import { screen, db } from "../../../utils";
 import { styles } from "./BtnAgendar.styles";
 
 export function BtnAgendar(props) {
   const { idEspacioDeportivo } = props;
 
   const [hasLogged, setHasLogged] = useState(false);
+  const [hasReserva, setHasReserva] = useState(false);
   const navigation = useNavigation();
   const auth = getAuth();
 
@@ -18,6 +21,20 @@ export function BtnAgendar(props) {
       setHasLogged(user ? true : false);
     });
   }, []);
+
+  useEffect(() => {
+    if (hasLogged) {
+      const q = query(
+        collection(db, "Reserva"),
+        where("idEspacioDeportivo", "==", idEspacioDeportivo),
+        where("idUser", "==", auth.currentUser.uid)
+      );
+
+      onSnapshot(q, (snapshot) => {
+        if (size(snapshot.docs) > 0) setHasReserva(true);
+      });
+    }
+  }, [hasLogged]);
 
   const goToLogin = () => {
     navigation.navigate(screen.cuenta.tab, {
@@ -33,6 +50,14 @@ export function BtnAgendar(props) {
       }
     );
   };
+
+  if (hasLogged && hasReserva) {
+    return (
+      <View style={styles.content}>
+        <Text style={styles.textSendReserva}>Ya has agendado una reserva</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.content}>

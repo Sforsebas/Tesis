@@ -37,20 +37,40 @@ export function validationSchema() {
     time: Yup.string()
       .required("La hora es obligatoria.")
       .test(
-        "is-valid-time",
-        "La hora debe ser igual o posterior a la actual.",
+        "is-valid-time-range",
+        "La hora debe estar entre las 09:00 y las 19:00.",
+        function (value) {
+          if (!value) return true; // Si no hay valor, no validar aún
+
+          const [hours, minutes] = value.split(":").map(Number); // Extrae horas y minutos
+          const timeInMinutes = hours * 60 + minutes;
+
+          // Hora de inicio: 9:00 (en minutos)
+          const startTimeInMinutes = 9 * 60;
+          // Hora de fin: 19:00 (en minutos)
+          const endTimeInMinutes = 19 * 60;
+
+          return (
+            timeInMinutes >= startTimeInMinutes &&
+            timeInMinutes <= endTimeInMinutes
+          );
+        }
+      )
+      .test(
+        "is-valid-time-today",
+        "La hora debe ser igual o posterior a la actual si es hoy.",
         function (value) {
           const { date } = this.parent; // Accede al campo de fecha
-          if (!date) return true; // Si no hay fecha, no validar hora
+          if (!value || !date) return true; // Si no hay hora o fecha, no validar
 
           const selectedDate = truncateTime(new Date(date));
           const today = truncateTime(new Date());
 
           if (selectedDate.getTime() === today.getTime()) {
-            // Si la fecha es hoy, compara la hora
+            // Si la fecha es hoy, compara la hora con la actual
             return value >= getCurrentTime();
           }
-          return true; // Si la fecha no es hoy, cualquier hora es válida
+          return true; // Si no es hoy, cualquier hora dentro del rango es válida
         }
       ),
   });

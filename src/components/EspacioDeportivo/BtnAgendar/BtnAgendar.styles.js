@@ -14,4 +14,10 @@ export const styles = StyleSheet.create({
     color: "#014898",
     fontWeight: "bold",
   },
+  textSendReserva: {
+    textAlign: "center",
+    color: "#014898",
+    fontWeight: "bold",
+    fontSize: 16,
+  },
 });
