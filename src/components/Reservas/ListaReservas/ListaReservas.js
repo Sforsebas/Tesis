@@ -93,7 +93,7 @@ export function ListaReservas(props) {
                 </Text>
                 <Text style={styles.info}>
                   {`Pertenencias: ${
-                    reserva.description || "No registro pertenencias"
+                    reserva.description || "No registra pertenencias"
                   }`}
                 </Text>
 

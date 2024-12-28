@@ -11,9 +11,9 @@ const reservasStack = {
   reservas: "Reservas",
 };
 
-const rankingStack = {
-  tab: "RankingTab",
-  ranking: "Ranking",
+const reportesStack = {
+  tab: "ReportesTab",
+  reportes: "Reportes",
 };
 
 const cuentaStack = {
@@ -26,6 +26,6 @@ const cuentaStack = {
 export const screen = {
   espaciosdeportivos: espaciosdeportivosStack,
   reservas: reservasStack,
-  ranking: rankingStack,
+  reportes: reportesStack,
   cuenta: cuentaStack,
 };
