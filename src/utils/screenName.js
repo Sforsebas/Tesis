@@ -6,19 +6,14 @@ const espaciosdeportivosStack = {
   agregarReservaEspacioDeportivo: "AgregarReservaEspacioDeportivo",
 };
 
-const favoritosStack = {
-  tab: "FavoritosTab",
-  favoritos: "Favoritos",
+const reservasStack = {
+  tab: "ReservasTab",
+  reservas: "Reservas",
 };
 
 const rankingStack = {
   tab: "RankingTab",
   ranking: "Ranking",
-};
-
-const busquedaStack = {
-  tab: "BusquedaTab",
-  busqueda: "Busqueda",
 };
 
 const cuentaStack = {
@@ -30,8 +25,7 @@ const cuentaStack = {
 
 export const screen = {
   espaciosdeportivos: espaciosdeportivosStack,
-  favoritos: favoritosStack,
+  reservas: reservasStack,
   ranking: rankingStack,
-  busqueda: busquedaStack,
   cuenta: cuentaStack,
 };

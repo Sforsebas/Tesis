@@ -1,15 +1,15 @@
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { FavoritosScreen } from "../screens/FavoritosScreen";
+import { ReservasScreen } from "../screens/Reservas/ReservasScreen";
 import { screen } from "../utils";
 
 const Stack = createNativeStackNavigator();
 
-export function FavoritosStack() {
+export function ReservasStack() {
   return (
     <Stack.Navigator>
       <Stack.Screen
-        name={screen.favoritos.favoritos}
-        component={FavoritosScreen}
+        name={screen.reservas.reservas}
+        component={ReservasScreen}
         options={{ title: "Reservas" }}
       />
     </Stack.Navigator>

@@ -1,9 +1,8 @@
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Icon } from "react-native-elements";
 import { EspaciosDeportivosStack } from "./EspacioDeportivoStack";
-import { FavoritosStack } from "./FavoritosStack";
+import { ReservasStack } from "./ReservasStack";
 import { RankingStack } from "./RankingStack";
-import { BusquedaStack } from "./BusquedaStack";
 import { CuentaStack } from "./CuentaStack";
 
 import { screen } from "../utils";
@@ -26,8 +25,8 @@ export function AppNavigation() {
         options={{ title: "Espacios Deportivos" }}
       />
       <Tab.Screen
-        name={screen.favoritos.tab}
-        component={FavoritosStack}
+        name={screen.reservas.tab}
+        component={ReservasStack}
         options={{ title: "Reservas" }}
       />
       <Tab.Screen
@@ -35,11 +34,6 @@ export function AppNavigation() {
         component={RankingStack}
         options={{ title: "Reportes" }}
       />
-      {/* <Tab.Screen
-        name={screen.busqueda.tab}
-        component={BusquedaStack}
-        options={{ title: "Buscar" }}
-      /> */}
       <Tab.Screen
         name={screen.cuenta.tab}
         component={CuentaStack}
@@ -56,16 +50,12 @@ function screenOptions(route, color, size) {
     iconName = "compass-outline";
   }
 
-  if (route.name === screen.favoritos.tab) {
+  if (route.name === screen.reservas.tab) {
     iconName = "heart-outline";
   }
 
   if (route.name === screen.ranking.tab) {
     iconName = "star-outline";
-  }
-
-  if (route.name === screen.busqueda.tab) {
-    iconName = "magnify";
   }
 
   if (route.name === screen.cuenta.tab) {
