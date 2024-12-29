@@ -19,9 +19,12 @@ export const styles = {
     paddingLeft: 10,
   },
   searchButton: {
-    backgroundColor: "#4CAF50",
+    backgroundColor: "#014898",
     padding: 10,
     alignItems: "center",
+    width: "65%",
+    alignSelf: "center",
+    marginBottom: 20,
   },
   searchButtonText: {
     color: "white",

@@ -25,6 +25,19 @@ export function AgregarReservaEspacioDeportivo(props) {
     validateOnChange: false,
     onSubmit: async (formValue) => {
       try {
+        const selectedDate = new Date(formValue.date);
+        const dayOfWeek = selectedDate.getDay();
+
+        // Validación adicional para evitar sábados y domingos
+        if (dayOfWeek === 0 || dayOfWeek === 6) {
+          Toast.show({
+            type: "error",
+            position: "bottom",
+            text1: "No se pueden agendar reservas en sábado o domingo.",
+          });
+          return; // No permite continuar con la reserva
+        }
+
         // Confirmación antes de proceder con la reserva
         Alert.alert(
           "Confirmar Reserva",
@@ -32,12 +45,11 @@ export function AgregarReservaEspacioDeportivo(props) {
           [
             {
               text: "Cancelar",
-              style: "cancel", // Si el usuario presiona "Cancelar", no hace nada
+              style: "cancel",
             },
             {
               text: "Confirmar",
               onPress: async () => {
-                // Si el usuario confirma, entonces proceder con la reserva
                 const auth = getAuth();
                 const idDoc = uuid();
                 const newData = formValue;
@@ -46,21 +58,19 @@ export function AgregarReservaEspacioDeportivo(props) {
                 newData.idUser = auth.currentUser.uid;
                 newData.createAt = new Date();
 
-                // Crear la reserva en la base de datos
                 await setDoc(doc(db, "Reserva", idDoc), newData);
-                Toast.show({
-                  type: "success",
-                  position: "bottom",
-                  text1: "Reserva agendada con éxito",
-                });
+                // Pasamos el mensaje a la pantalla de Espacios Deportivos
                 navigation.navigate(
-                  screen.espaciosdeportivos.espaciosdeportivos
+                  screen.espaciosdeportivos.espaciosdeportivos,
+                  {
+                    toastMessage: "Reserva agendada con éxito",
+                  }
                 );
               },
-              style: "destructive", // Usamos un estilo destructivo para resaltar la acción
+              style: "destructive",
             },
           ],
-          { cancelable: true } // Permite cerrar la alerta si el usuario toca fuera de ella
+          { cancelable: true }
         );
       } catch (error) {
         console.log(error);
@@ -87,9 +97,19 @@ export function AgregarReservaEspacioDeportivo(props) {
       {/* Selectores de fecha y hora */}
       <View>
         <DatePickerComponent
-          onDateChange={(selectedDate) =>
-            formik.setFieldValue("date", selectedDate)
-          }
+          onDateChange={(selectedDate) => {
+            const dayOfWeek = selectedDate.getDay();
+            if (dayOfWeek === 0 || dayOfWeek === 6) {
+              // Mostrar error si es sábado o domingo
+              Toast.show({
+                type: "error",
+                position: "bottom",
+                text1: "No se pueden agendar reservas en sábado o domingo.",
+              });
+            } else {
+              formik.setFieldValue("date", selectedDate);
+            }
+          }}
           onTimeChange={(selectedTime) =>
             formik.setFieldValue("time", selectedTime)
           }

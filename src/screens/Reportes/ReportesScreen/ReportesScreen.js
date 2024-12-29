@@ -89,7 +89,9 @@ export function ReportesScreen() {
     <View style={styles.container}>
       {/* Filtros */}
       <View style={styles.filters}>
-        <Text style={styles.filterTitle}>Descripción de la búsqueda</Text>
+        <Text style={styles.filterTitle}>
+          Ingrese el detalle de la búsqueda
+        </Text>
         <TextInput
           placeholder="Descripción"
           style={styles.input}
@@ -151,7 +153,7 @@ export function ReportesScreen() {
               <Text style={styles.title}>Espacio: {espacioNombre}</Text>
               <Text style={styles.info}>Fecha: {fechaFormateada}</Text>
               <Text style={styles.info}>
-                Descripción: {item.description || "Sin descripción"}
+                Descripción: {item.description || "No registra pertenencias"}
               </Text>
             </View>
           );

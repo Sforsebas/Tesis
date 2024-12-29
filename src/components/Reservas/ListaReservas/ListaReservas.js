@@ -1,16 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { View, FlatList, TouchableOpacity, Alert } from "react-native";
 import { Text } from "react-native-elements";
+import Toast from "react-native-toast-message"; // Importar Toast
 import { useNavigation } from "@react-navigation/native";
 import { screen, db } from "../../../utils";
 import { styles } from "./ListaReservas.styles";
-import {
-  doc,
-  deleteDoc,
-  getDoc,
-  getDocs,
-  collection,
-} from "firebase/firestore";
+import { doc, deleteDoc, getDocs, collection } from "firebase/firestore";
 
 export function ListaReservas(props) {
   const { reservas } = props;
@@ -63,62 +58,72 @@ export function ListaReservas(props) {
     );
   };
 
-  const eliminarReservaDeBaseDeDatos = (reservaId) => {
-    const reservaRef = doc(db, "Reserva", reservaId);
-    deleteDoc(reservaRef)
-      .then(() => {
-        console.log("Reserva eliminada con éxito");
-      })
-      .catch((error) => {
-        console.error("Error al eliminar la reserva:", error);
+  const eliminarReservaDeBaseDeDatos = async (reservaId) => {
+    try {
+      const reservaRef = doc(db, "Reserva", reservaId);
+      await deleteDoc(reservaRef);
+
+      // Mostrar Toast de confirmación
+      Toast.show({
+        type: "success",
+        position: "bottom",
+        text1: "Reserva eliminada",
+        text2: "La reserva ha sido eliminada correctamente.",
       });
+    } catch (error) {
+      console.error("Error al eliminar la reserva:", error);
+    }
   };
 
   return (
-    <FlatList
-      data={reservas}
-      keyExtractor={(item) => item.id}
-      renderItem={({ item }) => {
-        const reserva = item.data ? item.data() : {};
-        const espacioId = reserva.idEspacioDeportivo;
+    <>
+      <FlatList
+        data={reservas}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => {
+          const reserva = item.data ? item.data() : {};
+          const espacioId = reserva.idEspacioDeportivo;
 
-        return (
-          <TouchableOpacity onPress={() => irAReservas(item)}>
-            <View style={styles.reservas}>
-              <View>
-                <Text style={styles.name}>
-                  {espacios[espacioId]
-                    ? `${espacios[espacioId]}`
-                    : "Cargando espacio..."}
-                </Text>
-                <Text style={styles.info}>
-                  {`Pertenencias: ${
-                    reserva.description || "No registra pertenencias"
-                  }`}
-                </Text>
+          return (
+            <TouchableOpacity onPress={() => irAReservas(item)}>
+              <View style={styles.reservas}>
+                <View>
+                  <Text style={styles.name}>
+                    {espacios[espacioId]
+                      ? `${espacios[espacioId]}`
+                      : "Cargando espacio..."}
+                  </Text>
+                  <Text style={styles.info}>
+                    {`Pertenencias: ${
+                      reserva.description || "No registra pertenencias"
+                    }`}
+                  </Text>
 
-                <Text style={styles.info}>
-                  {reserva.date
-                    ? reserva.date.toDate().toLocaleDateString("es-ES", {
-                        day: "2-digit",
-                        month: "2-digit",
-                        year: "numeric",
-                      })
-                    : "Fecha no disponible"}
-                </Text>
-                <Text style={styles.info}>
-                  {reserva.time || "Hora no disponible"}
-                </Text>
-              </View>
-              <TouchableOpacity onPress={() => eliminarReserva(item.id)}>
-                <View style={styles.deleteButton}>
-                  <Text style={styles.deleteButtonText}>Eliminar</Text>
+                  <Text style={styles.info}>
+                    {reserva.date
+                      ? reserva.date.toDate().toLocaleDateString("es-ES", {
+                          day: "2-digit",
+                          month: "2-digit",
+                          year: "numeric",
+                        })
+                      : "Fecha no disponible"}
+                  </Text>
+                  <Text style={styles.info}>
+                    {reserva.time || "Hora no disponible"}
+                  </Text>
                 </View>
-              </TouchableOpacity>
-            </View>
-          </TouchableOpacity>
-        );
-      }}
-    />
+                <TouchableOpacity onPress={() => eliminarReserva(item.id)}>
+                  <View style={styles.deleteButton}>
+                    <Text style={styles.deleteButtonText}>Eliminar</Text>
+                  </View>
+                </TouchableOpacity>
+              </View>
+            </TouchableOpacity>
+          );
+        }}
+      />
+      {/* Componente Toast */}
+      <Toast />
+    </>
   );
 }

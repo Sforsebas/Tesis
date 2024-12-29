@@ -6,7 +6,15 @@ const Stack = createNativeStackNavigator();
 
 export function ReportesStack() {
   return (
-    <Stack.Navigator>
+    <Stack.Navigator
+      screenOptions={{
+        headerStyle: {
+          backgroundColor: "#1B2E51",
+        },
+        headerTintColor: "#FDEBDB",
+        headerTitleAlign: "center",
+      }}
+    >
       <Stack.Screen
         name={screen.reportes.reportes}
         component={ReportesScreen}

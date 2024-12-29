@@ -33,6 +33,15 @@ export function validationSchema() {
         truncateTime(new Date()),
         "La fecha debe ser igual o posterior al día actual."
       )
+      .test(
+        "is-not-weekend",
+        "No es posible realizar reservas durante los días sábado y domingo.",
+        function (value) {
+          if (!value) return true; // Si no hay fecha, no validar aún
+          const dayOfWeek = new Date(value).getDay();
+          return dayOfWeek !== 0 && dayOfWeek !== 6; // No permite domingos (0) ni sábados (6)
+        }
+      )
       .required("La fecha es obligatoria."),
     time: Yup.string()
       .required("La hora es obligatoria.")
