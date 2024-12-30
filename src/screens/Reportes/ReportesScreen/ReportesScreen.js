@@ -5,11 +5,47 @@ import {
   FlatList,
   TouchableOpacity,
   TextInput,
+  ToastAndroid,
+  Alert,
 } from "react-native";
 import { getDocs, collection, query, where } from "firebase/firestore";
 import { db } from "../../../utils"; // Ajusta el path según tu estructura
 import { styles } from "./ReportesScreen.styles";
 import { DatePickerComponent } from "../../../components/Shared"; // Ajusta la ruta según sea necesario
+import * as FileSystem from "expo-file-system"; // Usamos FileSystem de Expo
+import * as XLSX from "xlsx";
+import * as Sharing from "expo-sharing"; // Para compartir archivos
+
+export async function exportToExcel(reportes) {
+  try {
+    // Crear datos de Excel
+    const ws = XLSX.utils.json_to_sheet(reportes);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Reportes");
+
+    // Guardar como base64
+    const archivoExcel = XLSX.write(wb, { type: "base64", bookType: "xlsx" });
+
+    // Ruta temporal
+    const fileUri = FileSystem.documentDirectory + "reportes.xlsx";
+    await FileSystem.writeAsStringAsync(fileUri, archivoExcel, {
+      encoding: FileSystem.EncodingType.Base64,
+    });
+
+    // Compartir archivo si es posible
+    if (await Sharing.isAvailableAsync()) {
+      await Sharing.shareAsync(fileUri);
+    } else {
+      Alert.alert(
+        "Compartir no disponible",
+        "No se puede compartir el archivo en este dispositivo."
+      );
+    }
+  } catch (error) {
+    console.error("Error al exportar el archivo Excel:", error);
+    Alert.alert("Error", "No se pudo exportar el archivo.");
+  }
+}
 
 export function ReportesScreen() {
   const [filtros, setFiltros] = useState({
@@ -44,7 +80,6 @@ export function ReportesScreen() {
 
       // Filtra por descripción si está definida
       if (filtros.descripcion) {
-        // Buscando texto que contenga la descripción en cualquier parte
         condiciones.push(where("description", ">=", filtros.descripcion));
         condiciones.push(
           where("description", "<=", filtros.descripcion + "\uf8ff")
@@ -59,7 +94,6 @@ export function ReportesScreen() {
         condiciones.push(where("date", "<=", new Date(filtros.fechaFin)));
       }
 
-      // Aplica las condiciones al query
       if (condiciones.length > 0) {
         reportesQuery = query(reportesQuery, ...condiciones);
       }
@@ -100,27 +134,25 @@ export function ReportesScreen() {
         />
 
         <Text style={styles.filterTitle}>Fecha de Inicio de Búsqueda</Text>
-        {/* Selección de fecha inicio */}
         <DatePickerComponent
           onDateChange={(selectedDate) =>
             setFiltros({ ...filtros, fechaInicio: selectedDate.toISOString() })
           }
-          showTimePicker={false} // No es necesario seleccionar la hora
+          showTimePicker={false}
           selectedDate={
             filtros.fechaInicio ? new Date(filtros.fechaInicio) : new Date()
-          } // Muestra la fecha seleccionada o la fecha actual
+          }
         />
 
         <Text style={styles.filterTitle}>Fecha de Término de Búsqueda</Text>
-        {/* Selección de fecha fin */}
         <DatePickerComponent
           onDateChange={(selectedDate) =>
             setFiltros({ ...filtros, fechaFin: selectedDate.toISOString() })
           }
-          showTimePicker={false} // No es necesario seleccionar la hora
+          showTimePicker={false}
           selectedDate={
             filtros.fechaFin ? new Date(filtros.fechaFin) : new Date()
-          } // Muestra la fecha seleccionada o la fecha actual
+          }
         />
       </View>
 
@@ -139,13 +171,12 @@ export function ReportesScreen() {
           const espacioNombre =
             espacios[item.idEspacioDeportivo] || "Espacio no disponible";
 
-          // Formatear la fecha para que aparezca en formato Día/Mes/Año
           const fechaFormateada = new Date(
             item.date.seconds * 1000
           ).toLocaleDateString("es-ES", {
-            day: "2-digit", // Dos dígitos para el día
-            month: "2-digit", // Dos dígitos para el mes
-            year: "numeric", // Año con 4 dígitos
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
           });
 
           return (
@@ -159,6 +190,14 @@ export function ReportesScreen() {
           );
         }}
       />
+
+      {/* Botón para exportar a Excel */}
+      <TouchableOpacity
+        onPress={() => exportToExcel(reportes)}
+        style={styles.exportButton}
+      >
+        <Text style={styles.exportButtonText}>Exportar a Excel</Text>
+      </TouchableOpacity>
     </View>
   );
 }
