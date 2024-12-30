@@ -10,7 +10,7 @@ import { styles } from "./EspaciosDeportivosScreen.styles";
 import Toast from "react-native-toast-message";
 
 export function EspaciosDeportivosScreen(props) {
-  const { navigation, route } = props; // Obtener props incluyendo route
+  const { navigation, route } = props; // Extraer route para manejar los parámetros
   const [currentUser, setCurrentUser] = useState(null);
   const [espaciosdeportivos, setEspaciosDeportivos] = useState(null);
 
@@ -32,16 +32,19 @@ export function EspaciosDeportivosScreen(props) {
     });
   }, []);
 
+  // Manejar el toastMessage si existe
   useEffect(() => {
-    // Verificar si hay un mensaje de Toast en la ruta de parámetros
     if (route.params?.toastMessage) {
       Toast.show({
         type: "success",
         position: "bottom",
-        text1: route.params.toastMessage, // Mostrar mensaje pasado desde otra pantalla
+        text1: route.params.toastMessage,
       });
+
+      // Limpiar el mensaje después de mostrarlo
+      navigation.setParams({ toastMessage: null });
     }
-  }, [route.params?.toastMessage]); // Ejecutar este efecto cada vez que el parámetro cambie
+  }, [route.params?.toastMessage]);
 
   const goToAgregarEspacioDeportivo = () => {
     navigation.navigate(screen.espaciosdeportivos.tab, {
@@ -67,6 +70,9 @@ export function EspaciosDeportivosScreen(props) {
           onPress={goToAgregarEspacioDeportivo}
         />
       )}
+
+      {/* Componente Toast */}
+      <Toast />
     </View>
   );
 }

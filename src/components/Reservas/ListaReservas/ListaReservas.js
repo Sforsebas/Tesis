@@ -35,7 +35,7 @@ export function ListaReservas(props) {
 
   const irAReservas = (reservas) => {
     navigation.navigate(screen.reservas.reservas, {
-      id: reservas.id,
+      id: reservas.id, // Solo enviamos el ID de la reserva
     });
   };
 

@@ -59,7 +59,8 @@ export function AgregarReservaEspacioDeportivo(props) {
                 newData.createAt = new Date();
 
                 await setDoc(doc(db, "Reserva", idDoc), newData);
-                // Pasamos el mensaje a la pantalla de Espacios Deportivos
+
+                // Navegamos a la pantalla EspaciosDeportivosScreen con el mensaje
                 navigation.navigate(
                   screen.espaciosdeportivos.espaciosdeportivos,
                   {
@@ -67,6 +68,7 @@ export function AgregarReservaEspacioDeportivo(props) {
                   }
                 );
               },
+
               style: "destructive",
             },
           ],
