@@ -23,63 +23,52 @@ import * as XLSX from "xlsx";
 import * as Sharing from "expo-sharing"; // Para compartir archivos
 
 // Función para exportar reportes a Excel
-export async function exportToExcel(reportes, espacios) {
+export async function exportToExcel(reportes, espacios, usuarios) {
   try {
-    // Verifica que los espacios estén correctamente cargados
     if (!espacios || Object.keys(espacios).length === 0) {
       console.warn("Los espacios no están cargados correctamente.");
       return;
     }
+    if (!usuarios || Object.keys(usuarios).length === 0) {
+      console.warn("Los usuarios no están cargados correctamente.");
+      return;
+    }
 
-    // Mapeo de los reportes con el nombre del espacio deportivo desde `espacios`
-    const reportesConNombreEspacio = reportes.map((reporte) => {
-      // Asegúrate de que idEspacioDeportivo esté presente
-      const espacioId = reporte.idEspacioDeportivo;
-      const espacioNombre = espacios[espacioId];
+    const reportesConDatos = reportes.map((reporte) => {
+      const usuario = usuarios[reporte.idUsuario] || {};
+      const espacioNombre =
+        espacios[reporte.idEspacioDeportivo] || "Espacio no disponible";
 
-      if (!espacioNombre) {
-        console.warn(
-          `No se encontró el nombre del espacio para el ID ${espacioId}`
-        );
-      }
-
-      // Verificación y conversión de la fecha si es necesario
-      let fechaFormateada = "Fecha no válida";
-      if (reporte.date) {
-        // Si el valor de 'date' es un Timestamp de Firebase
-        const fecha =
-          reporte.date instanceof Date
-            ? reporte.date
-            : new Date(reporte.date.seconds * 1000); // Convertir el Timestamp a Date
-        if (!isNaN(fecha)) {
-          fechaFormateada = fecha.toLocaleDateString("es-ES"); // Formatear la fecha
-        }
-      }
+      const fechaFormateada = reporte.date
+        ? new Date(reporte.date.seconds * 1000).toLocaleDateString("es-ES")
+        : "Fecha no disponible";
 
       return {
-        nombre: reporte.nombre || "Nombre no disponible", // Nombre del usuario
-        date: fechaFormateada, // Fecha
-        time: reporte.time, // Hora
-        name: espacioNombre || "Espacio no disponible", // Nombre del espacio deportivo
-        description: reporte.description || "No disponible", // Descripción
+        nombre: usuario.nombre || "Nombre no disponible",
+        date: fechaFormateada,
+        time: reporte.time,
+        name: espacioNombre,
+        description: reporte.description || "No disponible",
+        genero: usuario.genero || "No especificado",
+        rut: usuario.rut || "No disponible",
+        anoingreso: usuario.anoingreso || "No disponible",
+        carrera: usuario.carrera || "No disponible",
+        email: usuario.email || "Correo no disponible",
       };
     });
 
-    console.log("Datos a exportar:", reportesConNombreEspacio);
+    console.log("Datos a exportar:", reportesConDatos);
 
-    // Crear la hoja de trabajo y el libro
-    const ws = XLSX.utils.json_to_sheet(reportesConNombreEspacio);
+    const ws = XLSX.utils.json_to_sheet(reportesConDatos);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Reportes");
 
-    // Convertir el libro a un archivo Base64
     const archivoExcel = XLSX.write(wb, { type: "base64", bookType: "xlsx" });
     const fileUri = FileSystem.documentDirectory + "reportes.xlsx";
     await FileSystem.writeAsStringAsync(fileUri, archivoExcel, {
       encoding: FileSystem.EncodingType.Base64,
     });
 
-    // Compartir el archivo generado
     if (await Sharing.isAvailableAsync()) {
       await Sharing.shareAsync(fileUri);
     } else {
@@ -105,14 +94,16 @@ export function ReportesScreen() {
   const [usuarios, setUsuarios] = useState({});
   const [loading, setLoading] = useState(false);
 
-  // Función para obtener los nombres de los espacios deportivos
   const obtenerEspacios = async () => {
     try {
       const snapshot = await getDocs(collection(db, "Espacio_Deportivo"));
       const espaciosMap = {};
       snapshot.forEach((doc) => {
-        espaciosMap[doc.id] = doc.data().name;
+        const data = doc.data();
+        espaciosMap[doc.id] = data.name;
+        console.log(`Espacio ID: ${doc.id}, Nombre: ${data.name}`);
       });
+      console.log("Mapa de espacios cargado:", espaciosMap);
       setEspacios(espaciosMap);
     } catch (error) {
       console.error("Error obteniendo los espacios deportivos:", error);
@@ -125,15 +116,16 @@ export function ReportesScreen() {
       const usuariosMap = {};
       snapshot.forEach((doc) => {
         const data = doc.data();
-        if (data.idUser && data.nombre) {
-          usuariosMap[data.idUser] = data.nombre; // Usa idUser como clave
-        } else {
-          console.warn(
-            `El usuario con ID ${doc.id} no tiene idUser o nombre definido`
-          );
-        }
+        usuariosMap[data.idUser] = {
+          nombre: data.nombre,
+          genero: data.genero,
+          rut: data.rut,
+          anoingreso: data.anoingreso,
+          carrera: data.carrera,
+          email: data.email || "Correo no disponible",
+        };
       });
-      console.log("Usuarios obtenidos:", usuariosMap); // Verifica el mapeo
+      console.log("Usuarios obtenidos:", usuariosMap);
       setUsuarios(usuariosMap);
     } catch (error) {
       console.error("Error obteniendo usuarios:", error);
@@ -152,7 +144,6 @@ export function ReportesScreen() {
           where("description", "<=", filtros.descripcion + "\uf8ff")
         );
       }
-
       if (filtros.fechaInicio) {
         condiciones.push(where("date", ">=", new Date(filtros.fechaInicio)));
       }
@@ -170,41 +161,7 @@ export function ReportesScreen() {
         ...doc.data(),
       }));
 
-      const reportesConNombre = await Promise.all(
-        resultados.map(async (reporte) => {
-          // Obtener el nombre del espacio deportivo usando idEspacioDeportivo
-          const espacioRef = doc(
-            db,
-            "Espacio_Deportivo",
-            reporte.idEspacioDeportivo
-          );
-          const espacioSnap = await getDoc(espacioRef);
-          const espacioData = espacioSnap.data();
-          const espacioNombre = espacioData?.name || "Espacio no disponible"; // Nombre del espacio deportivo
-
-          // Obtener el nombre del usuario usando idUsuario
-          const usuarioNombre =
-            usuarios[reporte.idUsuario] || "Nombre no disponible"; // Nombre del usuario
-
-          // Formatear la fecha de reserva
-          const fechaFormateada =
-            reporte.date instanceof Date
-              ? reporte.date.toLocaleDateString("es-ES")
-              : new Date(reporte.date.seconds * 1000).toLocaleDateString(
-                  "es-ES"
-                ); // Timestamp a fecha
-
-          return {
-            nombre: usuarioNombre,
-            date: fechaFormateada, // Fecha de la reserva
-            time: reporte.time, // Hora de la reserva
-            name: espacioNombre, // Nombre del espacio deportivo
-            description: reporte.description || "No disponible", // Descripción de la reserva
-          };
-        })
-      );
-
-      setReportes(reportesConNombre);
+      setReportes(resultados);
     } catch (error) {
       console.error("Error buscando reportes:", error);
     } finally {
@@ -267,21 +224,29 @@ export function ReportesScreen() {
         data={reportes}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => {
+          const fechaFormateada = item.date
+            ? new Date(item.date.seconds * 1000).toLocaleDateString("es-ES")
+            : "Fecha no disponible";
+
           return (
             <View style={styles.resultItem}>
-              <Text style={styles.title}>Espacio: {item.name}</Text>
-              <Text style={styles.info}>Fecha: {item.date}</Text>
-              <Text style={styles.info}>
-                Descripción: {item.description || "No registra pertenencias"}
+              <Text style={styles.title}>
+                Espacio: {espacios[item.idEspacioDeportivo] || "No disponible"}
               </Text>
-              <Text style={styles.info}>Usuario: {item.nombre}</Text>
+              <Text style={styles.info}>Fecha: {fechaFormateada}</Text>
+              <Text style={styles.info}>
+                Descripción: {item.description || "No disponible"}
+              </Text>
+              <Text style={styles.info}>
+                Usuario: {usuarios[item.idUsuario]?.nombre || "No disponible"}
+              </Text>
             </View>
           );
         }}
       />
 
       <TouchableOpacity
-        onPress={() => exportToExcel(reportes, espacios)} // Asegúrate de pasar 'espacios'
+        onPress={() => exportToExcel(reportes, espacios, usuarios)}
         style={styles.exportButton}
       >
         <Text style={styles.exportButtonText}>Exportar a Excel</Text>
