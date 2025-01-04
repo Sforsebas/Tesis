@@ -1,21 +1,31 @@
 import { StyleSheet } from "react-native";
 
 export const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: "center", // Centra verticalmente
+    alignItems: "center", // Centra horizontalmente
+    backgroundColor: "#FFFFFF",
+    padding: 20,
+  },
   image: {
+    width: 250, // Aumenta el ancho de la imagen
+    height: 180, // Aumenta el alto de la imagen
     resizeMode: "contain",
-    width: "100%",
-    height: 150,
-    marginTop: 20,
+    marginBottom: 20,
   },
   content: {
-    marginHorizontal: 40,
+    width: "100%",
+    paddingHorizontal: 20,
   },
   textRegister: {
-    marginTop: 15,
-    marginHorizontal: 10,
+    marginTop: 20,
+    textAlign: "center",
+    fontSize: 16,
+    color: "#1B2E51",
   },
   btnRegister: {
-    color: "#2CA2DC",
+    color: "#1E90FF",
     fontWeight: "bold",
   },
 });

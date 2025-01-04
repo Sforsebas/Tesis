@@ -20,7 +20,7 @@ export function CuentaStack() {
       <Stack.Screen
         name={screen.cuenta.cuenta}
         component={CuentaScreen}
-        options={{ title: "Cuenta" }}
+        options={{ title: "" }}
       />
 
       <Stack.Screen

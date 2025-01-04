@@ -27,6 +27,8 @@ export function LoginForm() {
           formValue.email,
           formValue.password
         );
+
+        // Redirigir al usuario a la pantalla principal después del login
         navigation.navigate(screen.cuenta.cuenta);
       } catch (error) {
         Toast.show({

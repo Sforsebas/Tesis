@@ -42,18 +42,19 @@ export function AgregarReservaEspacioDeportivo(props) {
           return;
         }
 
-        // Verificar si ya existe una reserva para el mismo espacio y el mismo día
-        const reservationsQuery = query(
+        // Verificar si el usuario ya tiene una reserva para el mismo espacio y el mismo día
+        const spaceReservationQuery = query(
           collection(db, "Reserva"),
-          where("idEspacioDeportivo", "==", route.params.idEspacioDeportivo),
-          where("date", "==", formValue.date)
+          where("idUsuario", "==", getAuth().currentUser.uid), // Filtrar por usuario
+          where("idEspacioDeportivo", "==", route.params.idEspacioDeportivo), // Filtrar por espacio deportivo
+          where("date", "==", formValue.date) // Verificar que sea el mismo día
         );
 
-        const querySnapshot = await getDocs(reservationsQuery);
+        const spaceQuerySnapshot = await getDocs(spaceReservationQuery);
 
-        if (!querySnapshot.empty) {
+        if (!spaceQuerySnapshot.empty) {
           setMessage(
-            "Ya existe una reserva para este espacio deportivo en esta fecha."
+            "Ya has realizado una reserva para este espacio deportivo en esta fecha."
           );
           return;
         }

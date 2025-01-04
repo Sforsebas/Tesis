@@ -4,7 +4,6 @@ import { EspaciosDeportivosStack } from "./EspacioDeportivoStack";
 import { ReservasStack } from "./ReservasStack";
 import { ReportesStack } from "./ReportesStack";
 import { CuentaStack } from "./CuentaStack";
-
 import { screen } from "../utils";
 
 const Tab = createBottomTabNavigator();

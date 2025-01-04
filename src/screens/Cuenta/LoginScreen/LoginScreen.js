@@ -14,21 +14,23 @@ export function LoginScreen() {
   };
 
   return (
-    <ScrollView>
-      <Image
-        source={require("../../../../assets/img/Escudo Ubb.png")}
-        style={styles.image}
-      />
+    <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+      <View style={styles.container}>
+        <Image
+          source={require("../../../../assets/img/Escudo Ubb.png")}
+          style={styles.image}
+        />
 
-      <View style={styles.content}>
-        <LoginForm />
+        <View style={styles.content}>
+          <LoginForm />
 
-        <Text style={styles.textRegister}>
-          ¿Aún no tienes cuenta?{" "}
-          <Text style={styles.btnRegister} onPress={goToRegister}>
-            Registrarse
+          <Text style={styles.textRegister}>
+            ¿Aún no tienes cuenta?{" "}
+            <Text style={styles.btnRegister} onPress={goToRegister}>
+              Registrarse
+            </Text>
           </Text>
-        </Text>
+        </View>
       </View>
     </ScrollView>
   );
