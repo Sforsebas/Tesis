@@ -29,14 +29,21 @@ export function ReservasScreen(props) {
   useEffect(() => {
     if (!currentUser) return;
 
+    console.log("Usuario autenticado:", currentUser.uid); // Depuración: ver el uid del usuario
+
     // Solo obtener reservas del usuario actual
     const q = query(collection(db, "Reserva"), orderBy("createAt", "desc"));
 
     onSnapshot(q, (snapshot) => {
+      console.log("Datos de reserva:", snapshot.docs); // Depuración: ver todas las reservas
+
       const reservasData = snapshot.docs.filter((doc) => {
         const reserva = doc.data();
-        return reserva.idUser === currentUser.uid;
+        console.log("Comprobando reserva:", reserva); // Depuración: ver cada reserva
+        return reserva.idUsuario === currentUser.uid; // Filtrar solo por idUsuario
       });
+
+      console.log("Reservas filtradas:", reservasData); // Depuración: ver las reservas filtradas
       setReservas(reservasData);
     });
   }, [currentUser]);

@@ -10,15 +10,17 @@ import { styles } from "./EspaciosDeportivosScreen.styles";
 import Toast from "react-native-toast-message";
 
 export function EspaciosDeportivosScreen(props) {
-  const { navigation, route } = props; // Extraer route para manejar los parámetros
+  const { navigation, route } = props;
   const [currentUser, setCurrentUser] = useState(null);
   const [espaciosdeportivos, setEspaciosDeportivos] = useState(null);
 
   useEffect(() => {
     const auth = getAuth();
-    onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
       setCurrentUser(user);
     });
+
+    return () => unsubscribe(); // Limpieza del listener
   }, []);
 
   useEffect(() => {
@@ -27,9 +29,11 @@ export function EspaciosDeportivosScreen(props) {
       orderBy("createAt", "desc")
     );
 
-    onSnapshot(q, (snapshot) => {
+    const unsubscribe = onSnapshot(q, (snapshot) => {
       setEspaciosDeportivos(snapshot.docs);
     });
+
+    return () => unsubscribe(); // Limpieza del snapshot
   }, []);
 
   // Manejar el toastMessage si existe

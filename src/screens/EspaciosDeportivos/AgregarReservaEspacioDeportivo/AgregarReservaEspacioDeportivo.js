@@ -4,7 +4,6 @@ import { Input, Button } from "react-native-elements";
 import { useNavigation } from "@react-navigation/native";
 import { useFormik } from "formik";
 import Toast from "react-native-toast-message";
-import { v4 as uuid } from "uuid";
 import { getAuth } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
 import { db, screen } from "../../../utils";
@@ -28,14 +27,14 @@ export function AgregarReservaEspacioDeportivo(props) {
         const selectedDate = new Date(formValue.date);
         const dayOfWeek = selectedDate.getDay();
 
-        // Validación adicional para evitar sábados y domingos
+        // Validación para evitar reservas en sábado o domingo
         if (dayOfWeek === 0 || dayOfWeek === 6) {
           Toast.show({
             type: "error",
             position: "bottom",
             text1: "No se pueden agendar reservas en sábado o domingo.",
           });
-          return; // No permite continuar con la reserva
+          return;
         }
 
         // Confirmación antes de proceder con la reserva
@@ -51,16 +50,34 @@ export function AgregarReservaEspacioDeportivo(props) {
               text: "Confirmar",
               onPress: async () => {
                 const auth = getAuth();
-                const idDoc = uuid();
-                const newData = formValue;
-                newData.id = idDoc;
-                newData.idEspacioDeportivo = route.params.idEspacioDeportivo;
-                newData.idUser = auth.currentUser.uid;
-                newData.createAt = new Date();
+                const userId = auth.currentUser ? auth.currentUser.uid : null;
 
-                await setDoc(doc(db, "Reserva", idDoc), newData);
+                if (!userId) {
+                  Toast.show({
+                    type: "error",
+                    position: "bottom",
+                    text1: "Usuario no autenticado.",
+                  });
+                  return;
+                }
 
-                // Navegamos a la pantalla EspaciosDeportivosScreen con el mensaje
+                // Crear un nuevo objeto para la reserva
+                const newData = {
+                  ...formValue,
+                  idEspacioDeportivo: route.params.idEspacioDeportivo,
+                  idUsuario: userId, // Asignar directamente el UID del usuario autenticado
+                  createAt: new Date(), // Fecha de creación
+                };
+
+                // Guardar la reserva en la colección "Reserva"
+                const reservaRef = doc(
+                  db,
+                  "Reserva",
+                  `${userId}-${Date.now()}`
+                ); // ID único basado en UID y timestamp
+                await setDoc(reservaRef, newData);
+
+                // Navegar y pasar el mensaje de éxito
                 navigation.navigate(
                   screen.espaciosdeportivos.espaciosdeportivos,
                   {
@@ -68,14 +85,13 @@ export function AgregarReservaEspacioDeportivo(props) {
                   }
                 );
               },
-
               style: "destructive",
             },
           ],
           { cancelable: true }
         );
       } catch (error) {
-        console.log(error);
+        console.error("Error al agendar reserva:", error);
         Toast.show({
           type: "error",
           position: "bottom",
