@@ -17,22 +17,27 @@ import * as Sharing from "expo-sharing";
 import { getAuth } from "firebase/auth";
 
 // Obtener el correo del usuario autenticado
-const obtenerCorreoDeUsuario = async (idUsuario) => {
+const obtenerUsuarios = async () => {
   try {
-    const auth = getAuth(); // Obtener la instancia de autenticación
-    const usuario = auth.currentUser; // Obtener el usuario autenticado actual
-    if (usuario && usuario.email) {
-      return usuario.email; // Retornar el correo del usuario autenticado
-    } else {
-      return "Correo no disponible"; // Si no se encuentra el usuario o el correo
-    }
+    const snapshot = await getDocs(collection(db, "Usuario"));
+    const usuariosMap = {};
+    snapshot.forEach((doc) => {
+      const data = doc.data();
+      usuariosMap[data.idUser] = {
+        nombre: data.nombre || "Nombre no disponible",
+        genero: data.genero || "No especificado",
+        rut: data.rut || "No disponible",
+        anoingreso: data.anoingreso || "No disponible",
+        carrera: data.carrera || "No disponible",
+        email: data.email || "Correo no registrado", // Incluye el email del usuario
+      };
+    });
+    setUsuarios(usuariosMap);
   } catch (error) {
-    console.error("Error obteniendo el correo del usuario:", error);
-    return "Correo no disponible";
+    console.error("Error obteniendo usuarios:", error);
   }
 };
 
-// Función para exportar reportes a Excel
 export async function exportToExcel(reportes, espacios, usuarios) {
   try {
     if (!espacios || Object.keys(espacios).length === 0) {
@@ -45,7 +50,7 @@ export async function exportToExcel(reportes, espacios, usuarios) {
     }
 
     const reportesConDatos = await Promise.all(
-      reportes.map(async (reporte) => {
+      reportes.map((reporte) => {
         const usuario = usuarios[reporte.idUsuario] || {}; // Usuario relacionado con la reserva
         const espacioNombre =
           espacios[reporte.idEspacioDeportivo] || "Espacio no disponible";
@@ -54,27 +59,23 @@ export async function exportToExcel(reportes, espacios, usuarios) {
           ? new Date(reporte.date.seconds * 1000).toLocaleDateString("es-ES")
           : "Fecha no disponible";
 
-        // Obtener correo del usuario asociado a la reserva
-        const correoUsuario = await obtenerCorreoDeUsuario(reporte.idUsuario);
-
         return {
           "Nombre del Usuario": usuario.nombre || "Nombre no disponible",
           Fecha: fechaFormateada,
-          Hora: reporte.time,
+          Hora: reporte.time || "Hora no disponible",
           "Nombre del Espacio Deportivo": espacioNombre,
           Descripción: reporte.description || "No disponible",
           Género: usuario.genero || "No especificado",
           Rut: usuario.rut || "No disponible",
           "Año de Ingreso": usuario.anoingreso || "No disponible",
           Carrera: usuario.carrera || "No disponible",
-          "Correo Electrónico": correoUsuario, // Aquí se toma el correo del usuario de la reserva
+          "Correo Electrónico": usuario.email || "Correo no registrado", // Extrae el email del usuario
         };
       })
     );
 
     console.log("Datos a exportar:", reportesConDatos);
 
-    // Se crea el worksheet con los nuevos encabezados
     const ws = XLSX.utils.json_to_sheet(reportesConDatos, {
       header: [
         "Nombre del Usuario",
@@ -86,7 +87,7 @@ export async function exportToExcel(reportes, espacios, usuarios) {
         "Rut",
         "Año de Ingreso",
         "Carrera",
-        "Correo Electrónico",
+        "Correo Electrónico", // Este encabezado aparecerá en el archivo Excel
       ],
     });
 
@@ -115,7 +116,7 @@ export async function exportToExcel(reportes, espacios, usuarios) {
 
 export function ReportesScreen() {
   const [filtros, setFiltros] = useState({
-    descripcion: "",
+    correo: "", // Solo filtramos por correo ahora
     fechaInicio: "",
     fechaFin: "",
   });
@@ -152,6 +153,7 @@ export function ReportesScreen() {
           rut: data.rut,
           anoingreso: data.anoingreso,
           carrera: data.carrera,
+          email: data.email, // Asegurando que el correo esté disponible
         };
       });
       console.log("Usuarios obtenidos:", usuariosMap);
@@ -167,12 +169,23 @@ export function ReportesScreen() {
       let reportesQuery = collection(db, "Reserva");
       const condiciones = [];
 
-      if (filtros.descripcion) {
-        condiciones.push(where("description", ">=", filtros.descripcion));
-        condiciones.push(
-          where("description", "<=", filtros.descripcion + "\uf8ff")
-        );
+      // Filtrar por correo
+      if (filtros.correo) {
+        const usuariosFiltrados = Object.keys(usuarios).filter((userId) => {
+          // Verificamos si el correo existe antes de llamar a toLowerCase
+          const email = usuarios[userId]?.email?.toLowerCase();
+          return email && email.includes(filtros.correo.toLowerCase());
+        });
+
+        if (usuariosFiltrados.length > 0) {
+          condiciones.push(where("idUsuario", "in", usuariosFiltrados));
+        } else {
+          Alert.alert("No se encontraron usuarios con ese correo");
+          return;
+        }
       }
+
+      // Filtrar por fechas
       if (filtros.fechaInicio) {
         condiciones.push(where("date", ">=", new Date(filtros.fechaInicio)));
       }
@@ -216,10 +229,10 @@ export function ReportesScreen() {
           Ingrese el detalle de la búsqueda
         </Text>
         <TextInput
-          placeholder="Descripción"
+          placeholder="Correo"
           style={styles.input}
-          value={filtros.descripcion}
-          onChangeText={(text) => setFiltros({ ...filtros, descripcion: text })}
+          value={filtros.correo}
+          onChangeText={(text) => setFiltros({ ...filtros, correo: text })}
         />
         <Text style={styles.filterTitle}>Fecha de Inicio de Búsqueda</Text>
         <DatePickerComponent
@@ -268,6 +281,10 @@ export function ReportesScreen() {
               </Text>
               <Text style={styles.info}>
                 Usuario: {usuarios[item.idUsuario]?.nombre || "No disponible"}
+              </Text>
+              <Text style={styles.info}>
+                Correo:{" "}
+                {usuarios[item.idUsuario]?.email || "Correo no disponible"}
               </Text>
             </View>
           );

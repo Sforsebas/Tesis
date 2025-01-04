@@ -33,12 +33,13 @@ export function RegisterForm() {
         const uid = userCredential.user.uid;
 
         // Excluir los campos password y repeatPassword del objeto formValue
-        const { password, repeatPassword, email, ...userData } = formValue;
+        const { password, repeatPassword, ...userData } = formValue;
 
         // Guardar los datos del usuario en Firestore, utilizando el UID como ID del documento
         const newData = {
           ...userData,
           idUser: uid, // Asociar el UID como referencia
+          email: formValue.email, // Agregar el campo email a la colección Usuario
         };
 
         await setDoc(doc(db, "Usuario", uid), newData);
