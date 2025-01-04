@@ -7,20 +7,30 @@ import {
   TextInput,
   Alert,
 } from "react-native";
-import {
-  getDocs,
-  collection,
-  query,
-  where,
-  doc,
-  getDoc,
-} from "firebase/firestore";
+import { getDocs, collection, query, where } from "firebase/firestore";
 import { db } from "../../../utils"; // Ajusta el path según tu estructura
 import { styles } from "./ReportesScreen.styles";
 import { DatePickerComponent } from "../../../components/Shared"; // Ajusta la ruta según sea necesario
-import * as FileSystem from "expo-file-system"; // Usamos FileSystem de Expo
+import * as FileSystem from "expo-file-system";
 import * as XLSX from "xlsx";
-import * as Sharing from "expo-sharing"; // Para compartir archivos
+import * as Sharing from "expo-sharing";
+import { getAuth } from "firebase/auth";
+
+// Obtener el correo del usuario autenticado
+const obtenerCorreoDeUsuario = async (idUsuario) => {
+  try {
+    const auth = getAuth(); // Obtener la instancia de autenticación
+    const usuario = auth.currentUser; // Obtener el usuario autenticado actual
+    if (usuario && usuario.email) {
+      return usuario.email; // Retornar el correo del usuario autenticado
+    } else {
+      return "Correo no disponible"; // Si no se encuentra el usuario o el correo
+    }
+  } catch (error) {
+    console.error("Error obteniendo el correo del usuario:", error);
+    return "Correo no disponible";
+  }
+};
 
 // Función para exportar reportes a Excel
 export async function exportToExcel(reportes, espacios, usuarios) {
@@ -34,32 +44,52 @@ export async function exportToExcel(reportes, espacios, usuarios) {
       return;
     }
 
-    const reportesConDatos = reportes.map((reporte) => {
-      const usuario = usuarios[reporte.idUsuario] || {};
-      const espacioNombre =
-        espacios[reporte.idEspacioDeportivo] || "Espacio no disponible";
+    const reportesConDatos = await Promise.all(
+      reportes.map(async (reporte) => {
+        const usuario = usuarios[reporte.idUsuario] || {}; // Usuario relacionado con la reserva
+        const espacioNombre =
+          espacios[reporte.idEspacioDeportivo] || "Espacio no disponible";
 
-      const fechaFormateada = reporte.date
-        ? new Date(reporte.date.seconds * 1000).toLocaleDateString("es-ES")
-        : "Fecha no disponible";
+        const fechaFormateada = reporte.date
+          ? new Date(reporte.date.seconds * 1000).toLocaleDateString("es-ES")
+          : "Fecha no disponible";
 
-      return {
-        nombre: usuario.nombre || "Nombre no disponible",
-        date: fechaFormateada,
-        time: reporte.time,
-        name: espacioNombre,
-        description: reporte.description || "No disponible",
-        genero: usuario.genero || "No especificado",
-        rut: usuario.rut || "No disponible",
-        anoingreso: usuario.anoingreso || "No disponible",
-        carrera: usuario.carrera || "No disponible",
-        email: usuario.email || "Correo no disponible",
-      };
-    });
+        // Obtener correo del usuario asociado a la reserva
+        const correoUsuario = await obtenerCorreoDeUsuario(reporte.idUsuario);
+
+        return {
+          "Nombre del Usuario": usuario.nombre || "Nombre no disponible",
+          Fecha: fechaFormateada,
+          Hora: reporte.time,
+          "Nombre del Espacio Deportivo": espacioNombre,
+          Descripción: reporte.description || "No disponible",
+          Género: usuario.genero || "No especificado",
+          Rut: usuario.rut || "No disponible",
+          "Año de Ingreso": usuario.anoingreso || "No disponible",
+          Carrera: usuario.carrera || "No disponible",
+          "Correo Electrónico": correoUsuario, // Aquí se toma el correo del usuario de la reserva
+        };
+      })
+    );
 
     console.log("Datos a exportar:", reportesConDatos);
 
-    const ws = XLSX.utils.json_to_sheet(reportesConDatos);
+    // Se crea el worksheet con los nuevos encabezados
+    const ws = XLSX.utils.json_to_sheet(reportesConDatos, {
+      header: [
+        "Nombre del Usuario",
+        "Fecha",
+        "Hora",
+        "Nombre del Espacio Deportivo",
+        "Descripción",
+        "Género",
+        "Rut",
+        "Año de Ingreso",
+        "Carrera",
+        "Correo Electrónico",
+      ],
+    });
+
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Reportes");
 
@@ -122,7 +152,6 @@ export function ReportesScreen() {
           rut: data.rut,
           anoingreso: data.anoingreso,
           carrera: data.carrera,
-          email: data.email || "Correo no disponible",
         };
       });
       console.log("Usuarios obtenidos:", usuariosMap);
