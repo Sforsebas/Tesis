@@ -15,4 +15,10 @@ export const styles = StyleSheet.create({
   btn: {
     backgroundColor: "#014898",
   },
+  message: {
+    color: "red", // Puedes cambiar el color según el tipo de mensaje (error o éxito)
+    marginTop: 10,
+    textAlign: "center",
+    fontSize: 16, // Puedes ajustar el tamaño de la fuente
+  },
 });

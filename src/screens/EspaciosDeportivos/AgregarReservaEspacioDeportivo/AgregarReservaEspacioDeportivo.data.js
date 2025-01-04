@@ -44,6 +44,10 @@ export function validationSchema() {
       )
       .required("La fecha es obligatoria."),
     time: Yup.string()
+      .matches(
+        /^(0[9]|1[0-9]|2[0-3]):([0-5][0-9])$/, // Asegura formato de hora HH:mm
+        "La hora debe estar en formato HH:mm."
+      )
       .required("La hora es obligatoria.")
       .test(
         "is-valid-time-range",

@@ -1,11 +1,18 @@
-import React from "react";
+import React, { useState } from "react";
 import { View, Text, Alert } from "react-native";
 import { Input, Button } from "react-native-elements";
 import { useNavigation } from "@react-navigation/native";
 import { useFormik } from "formik";
 import Toast from "react-native-toast-message";
 import { getAuth } from "firebase/auth";
-import { doc, setDoc } from "firebase/firestore";
+import {
+  collection,
+  query,
+  where,
+  getDocs,
+  doc,
+  setDoc,
+} from "firebase/firestore";
 import { db, screen } from "../../../utils";
 import {
   initialValues,
@@ -18,6 +25,8 @@ export function AgregarReservaEspacioDeportivo(props) {
   const { route } = props;
   const navigation = useNavigation();
 
+  const [message, setMessage] = useState(""); // Estado para manejar el mensaje
+
   const formik = useFormik({
     initialValues: initialValues(),
     validationSchema: validationSchema(),
@@ -29,11 +38,23 @@ export function AgregarReservaEspacioDeportivo(props) {
 
         // Validación para evitar reservas en sábado o domingo
         if (dayOfWeek === 0 || dayOfWeek === 6) {
-          Toast.show({
-            type: "error",
-            position: "bottom",
-            text1: "No se pueden agendar reservas en sábado o domingo.",
-          });
+          setMessage("No se pueden agendar reservas en sábado o domingo.");
+          return;
+        }
+
+        // Verificar si ya existe una reserva para el mismo espacio y el mismo día
+        const reservationsQuery = query(
+          collection(db, "Reserva"),
+          where("idEspacioDeportivo", "==", route.params.idEspacioDeportivo),
+          where("date", "==", formValue.date)
+        );
+
+        const querySnapshot = await getDocs(reservationsQuery);
+
+        if (!querySnapshot.empty) {
+          setMessage(
+            "Ya existe una reserva para este espacio deportivo en esta fecha."
+          );
           return;
         }
 
@@ -53,11 +74,7 @@ export function AgregarReservaEspacioDeportivo(props) {
                 const userId = auth.currentUser ? auth.currentUser.uid : null;
 
                 if (!userId) {
-                  Toast.show({
-                    type: "error",
-                    position: "bottom",
-                    text1: "Usuario no autenticado.",
-                  });
+                  setMessage("Usuario no autenticado.");
                   return;
                 }
 
@@ -92,11 +109,7 @@ export function AgregarReservaEspacioDeportivo(props) {
         );
       } catch (error) {
         console.error("Error al agendar reserva:", error);
-        Toast.show({
-          type: "error",
-          position: "bottom",
-          text1: "Error al enviar Reserva",
-        });
+        setMessage("Error al enviar la reserva.");
       }
     },
   });
@@ -119,11 +132,7 @@ export function AgregarReservaEspacioDeportivo(props) {
             const dayOfWeek = selectedDate.getDay();
             if (dayOfWeek === 0 || dayOfWeek === 6) {
               // Mostrar error si es sábado o domingo
-              Toast.show({
-                type: "error",
-                position: "bottom",
-                text1: "No se pueden agendar reservas en sábado o domingo.",
-              });
+              setMessage("No se pueden agendar reservas en sábado o domingo.");
             } else {
               formik.setFieldValue("date", selectedDate);
             }
@@ -144,6 +153,9 @@ export function AgregarReservaEspacioDeportivo(props) {
           </Text>
         )}
       </View>
+
+      {/* Mostrar mensaje de error o éxito */}
+      {message ? <Text style={styles.message}>{message}</Text> : null}
 
       {/* Botón de envío */}
       <View>
