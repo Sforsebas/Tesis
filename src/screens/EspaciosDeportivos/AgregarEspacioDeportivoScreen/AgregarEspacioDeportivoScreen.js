@@ -2,7 +2,6 @@ import React from "react";
 import { ScrollView } from "react-native";
 import { Button } from "react-native-elements";
 import { useFormik } from "formik";
-import { v4 as uuid } from "uuid";
 import { doc, setDoc } from "firebase/firestore";
 import { useNavigation } from "@react-navigation/native";
 import {
@@ -17,6 +16,15 @@ import {
 } from "./AgregarEspacioDeportivoScreen.data";
 import { styles } from "./AgregarEspacioDeportivotScreen.styles";
 
+// Generador manual de UUID
+const generateUUID = () => {
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    const v = c === "x" ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+};
+
 export function AgregarEspacioDeportivoScreen() {
   const navigation = useNavigation();
 
@@ -27,7 +35,7 @@ export function AgregarEspacioDeportivoScreen() {
     onSubmit: async (formValue) => {
       try {
         const newData = formValue;
-        newData.id = uuid();
+        newData.id = generateUUID(); // Usar generador manual
         newData.createAt = new Date();
 
         const myDB = doc(db, "Espacio_Deportivo", newData.id);
@@ -39,6 +47,7 @@ export function AgregarEspacioDeportivoScreen() {
       }
     },
   });
+
   return (
     <ScrollView showsVerticalScrollIndicator={false}>
       <ImageEspacioDeportivo formik={formik} />

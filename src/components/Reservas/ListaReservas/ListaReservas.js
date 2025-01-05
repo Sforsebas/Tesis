@@ -98,6 +98,7 @@ export function ListaReservas(props) {
                   </Text>
 
                   <Text style={styles.info}>
+                    Fecha:
                     {reserva.date
                       ? reserva.date.toDate().toLocaleDateString("es-ES", {
                           day: "2-digit",
@@ -106,8 +107,10 @@ export function ListaReservas(props) {
                         })
                       : "Fecha no disponible"}
                   </Text>
+
+                  {/* Mostrar la hora con título */}
                   <Text style={styles.info}>
-                    {reserva.time || "Hora no disponible"}
+                    Hora: {reserva.time || "Hora no disponible"}
                   </Text>
                 </View>
                 <TouchableOpacity onPress={() => eliminarReserva(item.id)}>

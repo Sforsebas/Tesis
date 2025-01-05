@@ -3,49 +3,72 @@ import { ScrollView, Alert } from "react-native";
 import { Icon, Avatar, Text } from "react-native-elements";
 import * as ImagePicker from "expo-image-picker";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { v4 as uuid } from "uuid";
 import { map, filter } from "lodash";
 import { LoadingModal } from "../../../Shared";
 import { styles } from "./UploadImagesForm.styles";
+
+// Generador manual de UUID
+const generateUUID = () => {
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    const v = c === "x" ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+};
 
 export function UploadImagesForm(props) {
   const { formik } = props;
   const [isLoading, setIsLoading] = useState(false);
 
   const openGallery = async () => {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.All,
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 1,
-    });
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.All,
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 1,
+      });
 
-    if (!result.canceled) {
-      setIsLoading(true);
-      uploadImage(result.assets[0].uri);
+      if (!result.canceled) {
+        setIsLoading(true);
+        await uploadImage(result.assets[0].uri);
+      }
+    } catch (error) {
+      console.error("Error al abrir la galería:", error);
+      setIsLoading(false);
     }
   };
 
   const uploadImage = async (uri) => {
-    const response = await fetch(uri);
-    const blob = await response.blob();
+    try {
+      const response = await fetch(uri);
+      const blob = await response.blob();
 
-    const storage = getStorage();
-    const storageRef = ref(storage, `espaciosdeportivos/${uuid()}`);
+      const storage = getStorage();
+      const uniqueId = generateUUID(); // Usar generador manual
+      const storageRef = ref(storage, `espaciosdeportivos/${uniqueId}`);
 
-    uploadBytes(storageRef, blob).then((snapshot) => {
-      updatePhotosEspacioDeportivo(snapshot.metadata.fullPath);
-    });
+      await uploadBytes(storageRef, blob);
+      await updatePhotosEspacioDeportivo(storageRef.fullPath);
+    } catch (error) {
+      console.error("Error al subir la imagen:", error);
+      setIsLoading(false);
+    }
   };
 
   const updatePhotosEspacioDeportivo = async (imagePath) => {
-    const storage = getStorage();
-    const imageRef = ref(storage, imagePath);
+    try {
+      const storage = getStorage();
+      const imageRef = ref(storage, imagePath);
 
-    const imageUrl = await getDownloadURL(imageRef);
+      const imageUrl = await getDownloadURL(imageRef);
 
-    formik.setFieldValue("images", [...formik.values.images, imageUrl]);
-    setIsLoading(false);
+      formik.setFieldValue("images", [...formik.values.images, imageUrl]);
+      setIsLoading(false);
+    } catch (error) {
+      console.error("Error al obtener la URL de la imagen:", error);
+      setIsLoading(false);
+    }
   };
 
   const removeImage = (img) => {
