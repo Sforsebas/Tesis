@@ -14,6 +14,25 @@ import { ListaReservas } from "../../../components/Reservas";
 import { screen, db } from "../../../utils";
 import { styles } from "./ReservasScreen.styles";
 
+// Función para obtener la fecha y hora combinada de la reserva
+const obtenerFechaYHora = (fechaReserva, horaReserva) => {
+  const fechaReservaMillis = fechaReserva.seconds * 1000;
+  const fecha = new Date(fechaReservaMillis);
+  const [hora, minuto] = horaReserva.split(":").map((item) => parseInt(item));
+
+  fecha.setHours(hora, minuto, 0, 0);
+
+  return fecha;
+};
+
+// Función para verificar si una reserva no ha pasado más de 15 minutos del día actual.
+const esReservaValida = (fechaReserva, horaReserva) => {
+  const fechaYHoraReserva = obtenerFechaYHora(fechaReserva, horaReserva);
+  const tiempoActual = Date.now();
+  const tiempoTranscurrido = tiempoActual - fechaYHoraReserva.getTime();
+  return tiempoTranscurrido <= 15 * 60 * 1000; // 15 minutos en milisegundos
+};
+
 export function ReservasScreen(props) {
   const { navigation } = props;
   const [currentUser, setCurrentUser] = useState(null);
@@ -32,15 +51,28 @@ export function ReservasScreen(props) {
     // Solo obtener reservas del usuario actual
     const q = query(collection(db, "Reserva"), orderBy("createAt", "desc"));
 
-    onSnapshot(q, (snapshot) => {
-      const reservasData = snapshot.docs.filter((doc) => {
-        const reserva = doc.data();
+    // Función para actualizar las reservas
+    const obtenerReservas = () => {
+      onSnapshot(q, (snapshot) => {
+        const reservasData = snapshot.docs.filter((doc) => {
+          const reserva = doc.data();
 
-        return reserva.idUsuario === currentUser.uid; // Filtrar solo por idUsuario
+          return (
+            reserva.idUsuario === currentUser.uid &&
+            esReservaValida(reserva.date, reserva.time)
+          );
+        });
+
+        setReservas(reservasData);
       });
+    };
 
-      setReservas(reservasData);
-    });
+    obtenerReservas();
+
+    //Funcion para actualizar la página cada 1 minuto
+    const intervalId = setInterval(obtenerReservas, 60000); // 60000ms = 1 minuto
+
+    return () => clearInterval(intervalId);
   }, [currentUser]);
 
   // Función para eliminar la reserva
