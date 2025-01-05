@@ -8,9 +8,9 @@ import {
   Alert,
 } from "react-native";
 import { getDocs, collection, query, where } from "firebase/firestore";
-import { db } from "../../../utils"; // Ajusta el path según tu estructura
+import { db } from "../../../utils";
 import { styles } from "./ReportesScreen.styles";
-import { DatePickerComponent } from "../../../components/Shared"; // Ajusta la ruta según sea necesario
+import { DatePickerComponent } from "../../../components/Shared";
 import * as FileSystem from "expo-file-system";
 import * as XLSX from "xlsx";
 import * as Sharing from "expo-sharing";
@@ -74,8 +74,6 @@ export async function exportToExcel(reportes, espacios, usuarios) {
       })
     );
 
-    console.log("Datos a exportar:", reportesConDatos);
-
     const ws = XLSX.utils.json_to_sheet(reportesConDatos, {
       header: [
         "Nombre del Usuario",
@@ -87,7 +85,7 @@ export async function exportToExcel(reportes, espacios, usuarios) {
         "Rut",
         "Año de Ingreso",
         "Carrera",
-        "Correo Electrónico", // Este encabezado aparecerá en el archivo Excel
+        "Correo Electrónico",
       ],
     });
 
@@ -116,7 +114,7 @@ export async function exportToExcel(reportes, espacios, usuarios) {
 
 export function ReportesScreen() {
   const [filtros, setFiltros] = useState({
-    correo: "", // Solo filtramos por correo ahora
+    correo: "",
     fechaInicio: "",
     fechaFin: "",
   });
@@ -153,7 +151,7 @@ export function ReportesScreen() {
           rut: data.rut,
           anoingreso: data.anoingreso,
           carrera: data.carrera,
-          email: data.email, // Asegurando que el correo esté disponible
+          email: data.email,
         };
       });
       console.log("Usuarios obtenidos:", usuariosMap);
@@ -172,7 +170,7 @@ export function ReportesScreen() {
       // Filtrar por correo
       if (filtros.correo) {
         const usuariosFiltrados = Object.keys(usuarios).filter((userId) => {
-          // Verificamos si el correo existe antes de llamar a toLowerCase
+          // Verificar si el correo existe antes de llamar a toLowerCase
           const email = usuarios[userId]?.email?.toLowerCase();
           return email && email.includes(filtros.correo.toLowerCase());
         });

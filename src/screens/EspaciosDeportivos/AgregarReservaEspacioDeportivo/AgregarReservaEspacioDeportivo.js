@@ -25,7 +25,7 @@ export function AgregarReservaEspacioDeportivo(props) {
   const { route } = props;
   const navigation = useNavigation();
 
-  const [message, setMessage] = useState(""); // Estado para manejar el mensaje
+  const [message, setMessage] = useState("");
 
   const formik = useFormik({
     initialValues: initialValues(),
@@ -45,9 +45,9 @@ export function AgregarReservaEspacioDeportivo(props) {
         // Verificar si el usuario ya tiene una reserva para el mismo espacio y el mismo día
         const spaceReservationQuery = query(
           collection(db, "Reserva"),
-          where("idUsuario", "==", getAuth().currentUser.uid), // Filtrar por usuario
-          where("idEspacioDeportivo", "==", route.params.idEspacioDeportivo), // Filtrar por espacio deportivo
-          where("date", "==", formValue.date) // Verificar que sea el mismo día
+          where("idUsuario", "==", getAuth().currentUser.uid),
+          where("idEspacioDeportivo", "==", route.params.idEspacioDeportivo),
+          where("date", "==", formValue.date)
         );
 
         const spaceQuerySnapshot = await getDocs(spaceReservationQuery);
@@ -59,7 +59,6 @@ export function AgregarReservaEspacioDeportivo(props) {
           return;
         }
 
-        // Confirmación antes de proceder con la reserva
         Alert.alert(
           "Confirmar Reserva",
           "¿Estás seguro de que deseas agendar esta reserva?",
@@ -79,7 +78,7 @@ export function AgregarReservaEspacioDeportivo(props) {
                   return;
                 }
 
-                // Crear un nuevo objeto para la reserva
+                // Crear un nuevo campo para la reserva
                 const newData = {
                   ...formValue,
                   idEspacioDeportivo: route.params.idEspacioDeportivo,
@@ -92,7 +91,7 @@ export function AgregarReservaEspacioDeportivo(props) {
                   db,
                   "Reserva",
                   `${userId}-${Date.now()}`
-                ); // ID único basado en UID y timestamp
+                );
                 await setDoc(reservaRef, newData);
 
                 // Navegar y pasar el mensaje de éxito
@@ -117,7 +116,6 @@ export function AgregarReservaEspacioDeportivo(props) {
 
   return (
     <View style={styles.content}>
-      {/* Campo de descripción */}
       <Input
         placeholder="Ingrese una breve descripción de sus pertenencias"
         multiline
@@ -126,7 +124,6 @@ export function AgregarReservaEspacioDeportivo(props) {
         errorMessage={formik.errors.description}
       />
 
-      {/* Selectores de fecha y hora */}
       <View>
         <DatePickerComponent
           onDateChange={(selectedDate) => {
@@ -142,7 +139,7 @@ export function AgregarReservaEspacioDeportivo(props) {
             formik.setFieldValue("time", selectedTime)
           }
         />
-        {/* Mensajes de error */}
+
         {formik.errors.date && (
           <Text style={{ color: "red", marginTop: 5 }}>
             {formik.errors.date}
@@ -155,10 +152,8 @@ export function AgregarReservaEspacioDeportivo(props) {
         )}
       </View>
 
-      {/* Mostrar mensaje de error o éxito */}
       {message ? <Text style={styles.message}>{message}</Text> : null}
 
-      {/* Botón de envío */}
       <View>
         <Button
           title="Enviar Reserva"

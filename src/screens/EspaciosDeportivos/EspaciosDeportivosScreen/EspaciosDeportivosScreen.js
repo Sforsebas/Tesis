@@ -36,7 +36,6 @@ export function EspaciosDeportivosScreen(props) {
     return () => unsubscribe(); // Limpieza del snapshot
   }, []);
 
-  // Manejar el toastMessage si existe
   useEffect(() => {
     if (route.params?.toastMessage) {
       Toast.show({
@@ -75,7 +74,6 @@ export function EspaciosDeportivosScreen(props) {
         />
       )}
 
-      {/* Componente Toast */}
       <Toast />
     </View>
   );

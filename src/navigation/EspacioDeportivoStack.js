@@ -31,7 +31,7 @@ export function EspaciosDeportivosStack() {
       <Stack.Screen
         name={screen.espaciosdeportivos.espaciodeportivo}
         component={EspacioDeportivoScreen}
-        options={{ title: "Nuevo Espacio Deportivo" }}
+        options={{ title: "Espacio Deportivo" }}
       />
       <Stack.Screen
         name={screen.espaciosdeportivos.agregarReservaEspacioDeportivo}

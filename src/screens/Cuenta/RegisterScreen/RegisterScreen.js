@@ -9,7 +9,7 @@ export function RegisterScreen() {
   return (
     <KeyboardAwareScrollView>
       <Image
-        source={require("../../../../assets/img/Escudo Ubb.png")}
+        source={require("../../../../assets/img/REDUBB.png")}
         style={styles.image}
       />
       <View style={styles.content}>

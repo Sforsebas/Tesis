@@ -44,7 +44,6 @@ export function RegisterForm() {
 
         await setDoc(doc(db, "Usuario", uid), newData);
 
-        // Mostrar un mensaje de éxito
         Toast.show({
           type: "success",
           position: "bottom",
@@ -72,7 +71,6 @@ export function RegisterForm() {
 
   return (
     <View style={styles.content}>
-      {/* Campos adicionales */}
       <Input
         placeholder="Nombre completo"
         containerStyle={styles.input}
@@ -112,7 +110,6 @@ export function RegisterForm() {
         errorMessage={formik.errors.anoingreso}
       />
 
-      {/* Campos de correo y contraseña */}
       <Input
         placeholder="Correo Electrónico"
         containerStyle={styles.input}
@@ -149,7 +146,6 @@ export function RegisterForm() {
         errorMessage={formik.errors.repeatPassword}
       />
 
-      {/* Botón de registro */}
       <Button
         title="Registrar"
         containerStyle={styles.btnContainer}

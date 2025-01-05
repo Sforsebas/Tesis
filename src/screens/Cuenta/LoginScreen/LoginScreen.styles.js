@@ -9,10 +9,10 @@ export const styles = StyleSheet.create({
     padding: 20,
   },
   image: {
-    width: 250, // Aumenta el ancho de la imagen
-    height: 180, // Aumenta el alto de la imagen
+    width: 350, // Aumenta el ancho de la imagen
+    height: 230, // Aumenta el alto de la imagen
     resizeMode: "contain",
-    marginBottom: 20,
+    marginBottom: 10,
   },
   content: {
     width: "100%",

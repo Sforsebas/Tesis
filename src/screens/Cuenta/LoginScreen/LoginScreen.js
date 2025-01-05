@@ -17,7 +17,7 @@ export function LoginScreen() {
     <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
       <View style={styles.container}>
         <Image
-          source={require("../../../../assets/img/Escudo Ubb.png")}
+          source={require("../../../../assets/img/REDUBB.png")}
           style={styles.image}
         />
 

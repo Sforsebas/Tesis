@@ -10,7 +10,7 @@ import { doc, deleteDoc, getDocs, collection } from "firebase/firestore";
 export function ListaReservas(props) {
   const { reservas } = props;
   const navigation = useNavigation();
-  const [espacios, setEspacios] = useState({}); // Guardaremos los espacios deportivos por ID
+  const [espacios, setEspacios] = useState({});
 
   // Función para obtener los nombres de todos los espacios deportivos
   const obtenerEspacios = async () => {
@@ -20,22 +20,21 @@ export function ListaReservas(props) {
       );
       const espaciosData = {};
       espaciosSnapshot.forEach((doc) => {
-        espaciosData[doc.id] = doc.data().name; // Guardamos el nombre del espacio
+        espaciosData[doc.id] = doc.data().name;
       });
-      setEspacios(espaciosData); // Actualizamos el estado con los nombres de los espacios
+      setEspacios(espaciosData);
     } catch (error) {
       console.error("Error al obtener los espacios deportivos:", error);
     }
   };
 
-  // Cargar los nombres de los espacios deportivos cuando se monta el componente
   useEffect(() => {
     obtenerEspacios();
   }, []);
 
   const irAReservas = (reservas) => {
     navigation.navigate(screen.reservas.reservas, {
-      id: reservas.id, // Solo enviamos el ID de la reserva
+      id: reservas.id,
     });
   };
 
@@ -63,7 +62,6 @@ export function ListaReservas(props) {
       const reservaRef = doc(db, "Reserva", reservaId);
       await deleteDoc(reservaRef);
 
-      // Mostrar Toast de confirmación
       Toast.show({
         type: "success",
         position: "bottom",
@@ -122,7 +120,7 @@ export function ListaReservas(props) {
           );
         }}
       />
-      {/* Componente Toast */}
+
       <Toast />
     </>
   );
