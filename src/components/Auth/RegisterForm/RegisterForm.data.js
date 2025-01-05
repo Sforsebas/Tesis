@@ -10,6 +10,7 @@ export function initialValues() {
     carrera: "",
     genero: "",
     anoingreso: "",
+    rol: "", // Inicialización del rol
   };
 }
 
@@ -39,5 +40,11 @@ export function validationSchema() {
     anoingreso: Yup.number()
       .min(1940, "El año debe ser válido")
       .required("El año de ingreso es obligatorio"),
+    rol: Yup.string()
+      .oneOf(
+        ["usuario", "recepcion", "administracion"],
+        "Seleccione un rol válido"
+      )
+      .required("El rol es obligatorio"),
   });
 }

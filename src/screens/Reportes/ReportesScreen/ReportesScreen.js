@@ -7,7 +7,14 @@ import {
   TextInput,
   Alert,
 } from "react-native";
-import { getDocs, collection, query, where } from "firebase/firestore";
+import {
+  getDocs,
+  collection,
+  query,
+  where,
+  doc,
+  getDoc,
+} from "firebase/firestore";
 import { db } from "../../../utils";
 import { styles } from "./ReportesScreen.styles";
 import { DatePickerComponent } from "../../../components/Shared";
@@ -17,24 +24,22 @@ import * as Sharing from "expo-sharing";
 import { getAuth } from "firebase/auth";
 
 // Obtener el correo del usuario autenticado
-const obtenerUsuarios = async () => {
+const obtenerRolDelUsuario = async () => {
   try {
-    const snapshot = await getDocs(collection(db, "Usuario"));
-    const usuariosMap = {};
-    snapshot.forEach((doc) => {
-      const data = doc.data();
-      usuariosMap[data.idUser] = {
-        nombre: data.nombre || "Nombre no disponible",
-        genero: data.genero || "No especificado",
-        rut: data.rut || "No disponible",
-        anoingreso: data.anoingreso || "No disponible",
-        carrera: data.carrera || "No disponible",
-        email: data.email || "Correo no registrado", // Incluye el email del usuario
-      };
-    });
-    setUsuarios(usuariosMap);
+    const auth = getAuth();
+    const user = auth.currentUser;
+    if (user) {
+      const userRef = doc(db, "Usuario", user.uid);
+      const userDoc = await getDoc(userRef);
+      if (userDoc.exists()) {
+        return userDoc.data().rol; // Devuelve el rol del usuario
+      } else {
+        console.log("Usuario no encontrado");
+        return null;
+      }
+    }
   } catch (error) {
-    console.error("Error obteniendo usuarios:", error);
+    console.error("Error obteniendo el rol del usuario:", error);
   }
 };
 
@@ -122,6 +127,16 @@ export function ReportesScreen() {
   const [espacios, setEspacios] = useState({});
   const [usuarios, setUsuarios] = useState({});
   const [loading, setLoading] = useState(false);
+  const [rolUsuario, setRolUsuario] = useState(null);
+
+  // Obtener el rol del usuario
+  useEffect(() => {
+    const cargarRol = async () => {
+      const rol = await obtenerRolDelUsuario();
+      setRolUsuario(rol);
+    };
+    cargarRol();
+  }, []);
 
   const obtenerEspacios = async () => {
     try {
@@ -130,9 +145,7 @@ export function ReportesScreen() {
       snapshot.forEach((doc) => {
         const data = doc.data();
         espaciosMap[doc.id] = data.name;
-        console.log(`Espacio ID: ${doc.id}, Nombre: ${data.name}`);
       });
-      console.log("Mapa de espacios cargado:", espaciosMap);
       setEspacios(espaciosMap);
     } catch (error) {
       console.error("Error obteniendo los espacios deportivos:", error);
@@ -154,7 +167,6 @@ export function ReportesScreen() {
           email: data.email,
         };
       });
-      console.log("Usuarios obtenidos:", usuariosMap);
       setUsuarios(usuariosMap);
     } catch (error) {
       console.error("Error obteniendo usuarios:", error);
@@ -170,7 +182,6 @@ export function ReportesScreen() {
       // Filtrar por correo
       if (filtros.correo) {
         const usuariosFiltrados = Object.keys(usuarios).filter((userId) => {
-          // Verificar si el correo existe antes de llamar a toLowerCase
           const email = usuarios[userId]?.email?.toLowerCase();
           return email && email.includes(filtros.correo.toLowerCase());
         });
@@ -289,12 +300,15 @@ export function ReportesScreen() {
         }}
       />
 
-      <TouchableOpacity
-        onPress={() => exportToExcel(reportes, espacios, usuarios)}
-        style={styles.exportButton}
-      >
-        <Text style={styles.exportButtonText}>Exportar a Excel</Text>
-      </TouchableOpacity>
+      {/* Condicionar el botón "Exportar a Excel" */}
+      {rolUsuario !== "recepcion" && (
+        <TouchableOpacity
+          onPress={() => exportToExcel(reportes, espacios, usuarios)}
+          style={styles.exportButton}
+        >
+          <Text style={styles.exportButtonText}>Exportar a Excel</Text>
+        </TouchableOpacity>
+      )}
     </View>
   );
 }

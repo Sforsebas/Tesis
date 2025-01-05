@@ -1,14 +1,48 @@
+import React, { useState, useEffect } from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Icon } from "react-native-elements";
 import { EspaciosDeportivosStack } from "./EspacioDeportivoStack";
 import { ReservasStack } from "./ReservasStack";
 import { ReportesStack } from "./ReportesStack";
 import { CuentaStack } from "./CuentaStack";
-import { screen } from "../utils";
+import { getAuth } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
+import { db, screen } from "../utils";
 
 const Tab = createBottomTabNavigator();
 
 export function AppNavigation() {
+  const [role, setRole] = useState(null);
+
+  useEffect(() => {
+    const fetchUserRole = async () => {
+      try {
+        const auth = getAuth();
+        const user = auth.currentUser;
+
+        if (user) {
+          const userRef = doc(db, "Usuario", user.uid);
+          const userDoc = await getDoc(userRef);
+
+          if (userDoc.exists()) {
+            const { rol } = userDoc.data();
+            setRole(rol);
+          } else {
+            console.log("No se encontró el documento del usuario.");
+          }
+        }
+      } catch (error) {
+        console.error("Error al obtener el rol del usuario:", error);
+      }
+    };
+
+    fetchUserRole();
+  }, []);
+
+  if (role === null) {
+    return null; // Mientras se carga el rol, no mostrar nada
+  }
+
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -28,11 +62,13 @@ export function AppNavigation() {
         component={ReservasStack}
         options={{ title: "Reservas" }}
       />
-      <Tab.Screen
-        name={screen.reportes.tab}
-        component={ReportesStack}
-        options={{ title: "Reportes" }}
-      />
+      {role !== "usuario" && (
+        <Tab.Screen
+          name={screen.reportes.tab}
+          component={ReportesStack}
+          options={{ title: "Reportes" }}
+        />
+      )}
       <Tab.Screen
         name={screen.cuenta.tab}
         component={CuentaStack}

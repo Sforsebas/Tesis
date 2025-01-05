@@ -21,25 +21,19 @@ export function RegisterForm() {
     validateOnChange: false,
     onSubmit: async (formValue) => {
       try {
-        // Crear el usuario en Firebase Authentication
         const auth = getAuth();
         const userCredential = await createUserWithEmailAndPassword(
           auth,
           formValue.email,
           formValue.password
         );
-
-        // Obtener el UID del usuario
         const uid = userCredential.user.uid;
-
-        // Excluir los campos password y repeatPassword del objeto formValue
         const { password, repeatPassword, ...userData } = formValue;
 
-        // Guardar los datos del usuario en Firestore, utilizando el UID como ID del documento
         const newData = {
           ...userData,
-          idUser: uid, // Asociar el UID como referencia
-          email: formValue.email, // Agregar el campo email a la colección Usuario
+          idUser: uid,
+          email: formValue.email,
         };
 
         await setDoc(doc(db, "Usuario", uid), newData);
@@ -50,7 +44,6 @@ export function RegisterForm() {
           text1: "Usuario registrado con éxito",
         });
 
-        // Redirigir al usuario a la pantalla de cuenta
         navigation.navigate(screen.cuenta.cuenta);
       } catch (error) {
         console.error("Error al registrar usuario:", error);
@@ -109,7 +102,6 @@ export function RegisterForm() {
         onChangeText={(text) => formik.setFieldValue("anoingreso", text)}
         errorMessage={formik.errors.anoingreso}
       />
-
       <Input
         placeholder="Correo Electrónico"
         containerStyle={styles.input}
@@ -145,7 +137,13 @@ export function RegisterForm() {
         onChangeText={(text) => formik.setFieldValue("repeatPassword", text)}
         errorMessage={formik.errors.repeatPassword}
       />
-
+      <Input
+        placeholder="Rol (usuario/recepcion/administracion)"
+        containerStyle={styles.input}
+        rightIcon={<Icon type="material-community" name="account-key" />}
+        onChangeText={(text) => formik.setFieldValue("rol", text)}
+        errorMessage={formik.errors.rol}
+      />
       <Button
         title="Registrar"
         containerStyle={styles.btnContainer}

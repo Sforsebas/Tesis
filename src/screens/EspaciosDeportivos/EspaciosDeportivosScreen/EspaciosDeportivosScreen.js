@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { View } from "react-native";
 import { Icon } from "react-native-elements";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
 import { collection, onSnapshot, orderBy, query } from "firebase/firestore";
 import { LoadingModal } from "../../../components/Shared";
 import { ListaEspaciosDeportivos } from "../../../components/EspaciosDeportivos";
@@ -12,12 +13,24 @@ import Toast from "react-native-toast-message";
 export function EspaciosDeportivosScreen(props) {
   const { navigation, route } = props;
   const [currentUser, setCurrentUser] = useState(null);
+  const [role, setRole] = useState(null); // Estado para el rol del usuario
   const [espaciosdeportivos, setEspaciosDeportivos] = useState(null);
 
   useEffect(() => {
     const auth = getAuth();
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setCurrentUser(user);
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        setCurrentUser(user);
+        // Obtener el rol del usuario
+        const userRef = doc(db, "Usuario", user.uid);
+        const userDoc = await getDoc(userRef);
+        if (userDoc.exists()) {
+          setRole(userDoc.data().rol); // Asignar el rol al estado
+        }
+      } else {
+        setCurrentUser(null);
+        setRole(null);
+      }
     });
 
     return () => unsubscribe(); // Limpieza del listener
@@ -63,16 +76,17 @@ export function EspaciosDeportivosScreen(props) {
         <ListaEspaciosDeportivos espaciosdeportivos={espaciosdeportivos} />
       )}
 
-      {currentUser && (
-        <Icon
-          reverse
-          type="material-community"
-          name="plus"
-          color="#014898"
-          containerStyle={styles.btnContainer}
-          onPress={goToAgregarEspacioDeportivo}
-        />
-      )}
+      {currentUser &&
+        role !== "usuario" && ( // Solo mostrar el botón si no es usuario
+          <Icon
+            reverse
+            type="material-community"
+            name="plus"
+            color="#014898"
+            containerStyle={styles.btnContainer}
+            onPress={goToAgregarEspacioDeportivo}
+          />
+        )}
 
       <Toast />
     </View>
