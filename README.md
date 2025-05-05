@@ -80,4 +80,4 @@ Correo: [sebastian3097@outlook.com](mailto:sebastian3097@outlook.com)
 
 ## Licencia
 
-Este proyecto está bajo la Licencia MIT. Consulte el archivo LICENSE para más detalles.
+Este proyecto está bajo la Licencia MIT. Consulte el archivo [LICENSE](./LICENSE) para más detalles.
