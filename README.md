@@ -1,5 +1,5 @@
 
-# 📱 App de Gestión de Espacios Deportivos – Universidad del Bío-Bío
+# 📱 App de Gestión de Espacios Deportivos – REDUBB
 
 Aplicación móvil desarrollada con **React Native**, **Expo** y **Firebase**, programada en **JavaScript**. Permite gestionar la reserva de espacios deportivos para estudiantes de la Universidad del Bío-Bío.
 
