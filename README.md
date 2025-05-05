@@ -47,7 +47,7 @@ Este proyecto tiene como objetivo desarrollar una aplicación móvil para la ges
 ## 👤 Autor
 
 **Sebastián Carreño Muñoz**  
-Ingeniero en Informática de la Universidad del Bío-Bío.  
+Ingeniero de EEjecución en Computación e Informática de la Universidad del Bío-Bío.  
 Este proyecto es una muestra del trabajo realizado durante mi tesis, enfocada en el desarrollo de aplicaciones móviles con React Native y Firebase. La aplicación gestiona la reserva de espacios deportivos, y está dirigida a la comunidad universitaria.  
 
 Contacto: sebastian3097@outlook.com  
