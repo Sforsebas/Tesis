@@ -1,5 +1,5 @@
 
-# Tesis - Gestión de Espacios Deportivos en la Universidad del Bío-Bío
+# REDUBB - Gestión de Espacios Deportivos en la Universidad del Bío-Bío
 
 ## Descripción del Proyecto
 
