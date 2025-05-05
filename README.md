@@ -37,7 +37,7 @@ Antes de instalar y ejecutar la app, asegúrate de tener instalado:
 ### 1. Clonar el repositorio
 
 ```bash
-git clone https://github.com/tu-usuario/tu-repositorio.git
+git clone https://github.com/Sforsebas/Tesis.git
 cd tu-repositorio
 ```
 
@@ -135,4 +135,4 @@ Este proyecto está bajo la Licencia MIT. Puedes ver más en el archivo [LICENSE
 
 ## 👨‍💻 Autor
 
-**Sebastián Carreño Muñoz** – _Ingeniero en Informática, Universidad del Bío-Bío_
+**Sebastián Carreño Muñoz** – _Ingeniero de Ejecución en Computación e Informática, Universidad del Bío-Bío_
